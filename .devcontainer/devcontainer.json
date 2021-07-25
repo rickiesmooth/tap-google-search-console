@@ -1,0 +1,33 @@
+{
+  "name": "tap-google-search-console",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+
+  // Add the IDs of extensions you want installed when the container is created.
+  "extensions": [
+    "ms-python.vscode-pylance", 
+    "njpwerner.autodocstring",
+    "github.copilot"
+  ],
+
+  // Use 'postCreateCommand' to run commands after the container is created.
+  "postCreateCommand": "poetry install",
+
+  // Set *default* container specific settings.json values on container create.
+  "settings": {
+    "python.defaultInterpreterPath": "/usr/local/py-utils/venvs/poetry/bin/python",
+    "python.linting.ignorePatterns": [
+      ".vscode/*.py",
+      "**/site-packages/**/*.py"
+    ],
+    "files.exclude": {
+      "**/.git": true,
+      "**/.svn": true,
+      "**/.hg": true,
+      "**/CVS": true,
+      "**/.DS_Store": true,
+      "**/__pycache__": true
+    }
+  }
+}

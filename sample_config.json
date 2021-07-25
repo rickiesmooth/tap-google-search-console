@@ -1,0 +1,7 @@
+{
+    "start_date": "2021-01-01T00:00:00Z",
+    "name": "google_search_console",
+    "dimensions": ["date", "page", "device", "query", "country"],
+    "key_file_location": "./.secrets/client_secrets.json",
+    "site_url": "sc-domain:quantile.nl"
+}

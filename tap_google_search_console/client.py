@@ -75,7 +75,7 @@ class GoogleSearchConsoleStream(Stream):
         
         payload = {
             'startDate': "2019-01-01",
-            'endDate': "2021-07-25",
+            'endDate': "2021-09-15",
             'dimensions': self.dimensions,
             'rowLimit': 25000,
             'startRow': 0

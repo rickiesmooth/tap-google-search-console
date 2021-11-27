@@ -33,7 +33,7 @@ class GoogleSearchConsoleStream(Stream):
     ).to_dict()
 
     def start_date(self, context: dict) -> str:
-        start_date = self.get_starting_timestamp(context).format("YYYY-MM-DD")
+        start_date = self.get_starting_timestamp(context).add(days=1).format("YYYY-MM-DD")
         logging.info(f"Starting from date: {start_date}")
         return start_date
 

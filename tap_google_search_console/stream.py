@@ -17,6 +17,8 @@ class GoogleSearchConsoleStream(Stream):
 
     name = "google_search_console"
     replication_key = "date"
+    primary_keys = default_dimensions
+    dimensions = default_dimensions
 
     schema = th.PropertiesList(
         th.Property("date", th.DateTimeType),
@@ -29,8 +31,6 @@ class GoogleSearchConsoleStream(Stream):
         th.Property("ctr", th.NumberType),
         th.Property("position", th.NumberType),
     ).to_dict()
-
-    dimensions = default_dimensions
 
     def start_date(self, context: dict) -> str:
         start_date = self.get_starting_timestamp(context).format("YYYY-MM-DD")

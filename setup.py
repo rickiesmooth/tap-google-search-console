@@ -16,8 +16,8 @@ setuptools.setup(
         "Bug Tracker": "https://github.com/quantile-development/tap-google-search-console/issues",
     },
     install_requires=[
-        'singer-sdk==0.3.3',
-        'google-api-python-client==2.14.0'
+        'singer-sdk==0.3.14',
+        'google-api-python-client==2.14.0',
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

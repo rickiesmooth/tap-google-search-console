@@ -4,17 +4,18 @@ from typing import List
 from singer_sdk import Tap, Stream
 from singer_sdk import typing as th  # JSON schema typing helpers
 
-from tap_google_search_console.client import GoogleSearchConsoleStream
+from tap_google_search_console.stream import GoogleSearchConsoleStream
+
 
 class TapGoogleSearchConsole(Tap):
     """GoogleSearchConsole tap class."""
+
     name = "tap-google-search-console"
 
     config_jsonschema = th.PropertiesList(
         th.Property("site_url", th.StringType, required=True),
-        th.Property("name", th.StringType, default='google_search_console'),
         th.Property("key_file_location", th.StringType, required=True),
-        th.Property("start_date", th.DateTimeType)
+        th.Property("start_date", th.DateTimeType, required=True),
     ).to_dict()
 
     def discover_streams(self) -> List[Stream]:

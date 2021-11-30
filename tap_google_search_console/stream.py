@@ -17,7 +17,6 @@ class GoogleSearchConsoleStream(Stream):
 
     name = "google_search_console"
     replication_key = "date"
-    primary_keys = default_dimensions
     dimensions = default_dimensions
 
     schema = th.PropertiesList(

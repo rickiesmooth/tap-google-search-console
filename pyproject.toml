@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "tap-google-search-console"
 version = "0.0.1"
-description = "`tap-google-search-console` is a Singer tap for GoogleSearchConsole, built with the Meltano SDK for Singer Taps."
+description = "`tap-google-search-console` is a Singer tap for Google Search Console, built with the Meltano SDK for Singer Taps."
 authors = ["Jules Huisman"]
 license = "Apache 2.0"
 

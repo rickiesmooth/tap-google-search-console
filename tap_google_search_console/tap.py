@@ -13,8 +13,8 @@ class TapGoogleSearchConsole(Tap):
     name = "tap-google-search-console"
 
     config_jsonschema = th.PropertiesList(
+        th.Property("service_account_key", th.StringType, required=True),
         th.Property("site_url", th.StringType, required=True),
-        th.Property("key_file_location", th.StringType, required=True),
         th.Property("start_date", th.DateTimeType, required=True),
     ).to_dict()
 

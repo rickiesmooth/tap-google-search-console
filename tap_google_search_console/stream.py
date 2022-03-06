@@ -8,6 +8,7 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build, Resource
 
 from singer_sdk.streams import Stream
+import json
 
 default_dimensions = ["date", "page", "device", "query", "country"]
 
@@ -50,9 +51,10 @@ class GoogleSearchConsoleStream(Stream):
             service (Resource): Google Search Console service object.
         """
 
-        scope = ['https://www.googleapis.com/auth/webmasters']
-        credentials = service_account.Credentials.from_service_account_file(
-            self.config['key_file_location'], scopes=scope
+        service_account_object = json.loads(self.config['service_account_key'], strict=False)
+        credentials = service_account.Credentials.from_service_account_info(
+            service_account_object,
+            scopes=['https://www.googleapis.com/auth/webmasters'],
         )
 
         service = build('webmasters', 'v3', credentials=credentials)

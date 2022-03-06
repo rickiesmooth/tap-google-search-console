@@ -16,7 +16,7 @@ default_dimensions = ["date", "page", "device", "query", "country"]
 class GoogleSearchConsoleStream(Stream):
     """Stream class for GoogleSearchConsole streams."""
 
-    name = "google_search_console"
+    name = "google-search-console"
     replication_key = "date"
     dimensions = default_dimensions
 

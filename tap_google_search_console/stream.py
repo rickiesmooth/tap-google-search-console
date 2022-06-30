@@ -1,17 +1,21 @@
 """Custom client handling, including GoogleSearchConsoleStream base class."""
 import pendulum
 import logging
+import sys
+import copy
+import json
 
 from typing import Any, Dict, Optional, Iterable
 from singer_sdk import typing as th
 from google.oauth2 import service_account
 from googleapiclient.discovery import build, Resource
-
 from singer_sdk.streams import Stream
-import json
+from pathlib import Path
+from datetime import datetime
 
-default_dimensions = ["date", "page", "device", "query", "country"]
 
+default_dimensions = ["date", "page", "query"]
+row_limit = 25000
 
 class GoogleSearchConsoleStream(Stream):
     """Stream class for GoogleSearchConsole streams."""
@@ -51,7 +55,17 @@ class GoogleSearchConsoleStream(Stream):
             service (Resource): Google Search Console service object.
         """
 
-        service_account_object = json.loads(self.config['service_account_key'], strict=False)
+        # validate that the client_secrets.json file exists and load it
+        if Path(self.config['service_account_key']).is_file():
+            try:
+                service_account_object = load_json(self.config['service_account_key'])
+            except ValueError:
+                logging.error("tap-google-analytics: The JSON definition in '{}' has errors".format(self.config['service_account_key']))
+                sys.exit(1)
+        else:
+            logging.error("tap-google-analytics: '{}' file not found".format(self.config['service_account_key']))
+            sys.exit(1)
+
         credentials = service_account.Credentials.from_service_account_info(
             service_account_object,
             scopes=['https://www.googleapis.com/auth/webmasters'],
@@ -70,25 +84,65 @@ class GoogleSearchConsoleStream(Stream):
 
         return response
 
+    def _get_next_page_token(self, response: dict, previous_token: Any) -> Any:
+        """Return token identifying next page or None if all records have been read.
+        Args:
+        ----
+            response: A dict object.
+        Return:
+        ------
+            Reference value to retrieve next page.
+        .. _requests.Response:
+            https://docs.python-requests.org/en/latest/api/#requests.Response
+        """
+
+        if len(response['rows']) == row_limit:
+            return previous_token + row_limit
+
+
     def get_records(self, context: Optional[dict]) -> Iterable[dict]:
-        query_payload = {
-            'startDate': self.start_date(context=context),
-            'endDate': self.end_date(),
-            'dimensions': self.dimensions,
-            'rowLimit': 25000,
-            'startRow': 0,
-        }
-        response = self.query(query_payload)
+        next_page_token = 0
+        finished = False
 
-        for row in response['rows']:
-            data = {}
+        while not finished:
+            query_payload = {
+                'startDate': self.start_date(context=context),
+                'endDate': self.end_date(),
+                'dimensions': self.dimensions,
+                'rowLimit': row_limit,
+                'startRow': next_page_token,
+            }
+            resp = self.query(query_payload)
 
-            for i in range(len(query_payload['dimensions'])):
-                data[query_payload['dimensions'][i]] = row['keys'][i]
+            logging.info("resp length: '{}'".format(len(resp['rows'])))
+            logging.info("startRow: '{}'".format(query_payload['startRow']))
 
-            data['clicks'] = row['clicks']
-            data['impressions'] = row['impressions']
-            data['ctr'] = round(row['ctr'] * 100, 2)
-            data['position'] = round(row['position'], 2)
+            for row in resp['rows']:
+                data = {}
 
-            yield data
+                for i in range(len(query_payload['dimensions'])):
+                    data[query_payload['dimensions'][i]] = row['keys'][i]
+
+                data[query_payload['dimensions'][0]] = datetime.strptime(row['keys'][0], '%Y-%m-%d')
+
+                data['clicks'] = row['clicks']
+                data['impressions'] = row['impressions']
+                data['ctr'] = round(row['ctr'] * 100, 2)
+                data['position'] = round(row['position'], 2)
+
+                yield data
+            
+            previous_token = copy.deepcopy(next_page_token)
+            next_page_token = self._get_next_page_token(response=resp, previous_token=previous_token)
+
+            
+            if next_page_token and next_page_token == previous_token:
+                raise RuntimeError(
+                    f"Loop detected in pagination. "
+                    f"Pagination token {next_page_token} is identical to prior token."
+                )
+            # Cycle until get_next_page_token() no longer returns a value
+            finished = not next_page_token
+def load_json(path):
+    with open(path) as f:
+        return json.load(f)
